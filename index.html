@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoRoute AI — Intelligent Sustainable Transport System</title>
+  <meta name="description" content="AI-powered transport recommendation system promoting sustainable commute choices for smart cities (UN SDG 11 & 13).">
+  
+  <!-- CSS Styling -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- FontAwesome Icons for modern visuals (Fallback emojis are implemented) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js CDN for interactive graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">🌿</span>
+      <span class="brand-text">EcoRoute AI</span>
+    </div>
+    
+    <nav>
+      <ul class="nav-links">
+        <li>
+          <a class="nav-item active" data-view="planner">
+            <i class="fas fa-map-marked-alt"></i> Route Planner
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-view="coach">
+            <i class="fas fa-robot"></i> Eco-Coach AI
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-view="analytics">
+            <i class="fas fa-chart-line"></i> Analytics
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-view="impact">
+            <i class="fas fa-leaf"></i> Impact Tracker
+          </a>
+        </li>
+        <li>
+          <a class="nav-item" data-view="settings">
+            <i class="fas fa-cog"></i> Settings
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- SDG badges -->
+    <div class="sdg-badges">
+      <div class="sdg-badge sdg11" title="SDG 11: Sustainable Cities & Communities">SDG 11</div>
+      <div class="sdg-badge sdg13" title="SDG 13: Climate Action">SDG 13</div>
+    </div>
+
+    <!-- Tip of Day box -->
+    <div class="tip-box">
+      <h4><i class="fas fa-lightbulb"></i> Eco Tip of the Day</h4>
+      <p id="sidebar-tip-of-day">Loading tip...</p>
+    </div>
+
+    <div class="sidebar-footer">
+      Version 1.0.0<br>
+      Internship Portfolio Project
+    </div>
+  </aside>
+
+  <!-- MAIN DYNAMIC CONTENT -->
+  <main class="main-content">
+
+    <!-- PAGE 1: ROUTE PLANNER -->
+    <section id="view-planner" class="page-view active">
+      <h1>🗺️ Sustainable Route Planner</h1>
+      <p class="subtitle">Enter commute details to evaluate the most eco-friendly, budget-friendly, and fastest transit modes.</p>
+
+      <div class="grid-2">
+        <!-- Input parameters -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-sliders-h"></i> Commute Settings</div>
+          
+          <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label for="origin">Origin</label>
+              <input type="text" id="origin" value="Indiranagar" placeholder="Starting point">
+            </div>
+            <div class="form-group">
+              <label for="destination">Destination</label>
+              <input type="text" id="destination" value="Electronic City" placeholder="Ending point">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="slider-header">
+              <label for="distance">Commute Distance</label>
+              <span id="distance-val" class="val">15 km</span>
+            </div>
+            <input type="range" id="distance" min="1" max="100" value="15">
+          </div>
+
+          <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <div class="slider-header">
+                <label for="hour">Time of Day</label>
+                <span id="hour-val" class="val">9 AM</span>
+              </div>
+              <input type="range" id="hour" min="0" max="23" value="9">
+            </div>
+            
+            <div class="form-group">
+              <label for="day-of-week">Day of Week</label>
+              <select id="day-of-week">
+                <option value="0" selected>Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="weather">Current Weather</label>
+            <select id="weather">
+              <option value="clear" selected>Clear Sky ☀️</option>
+              <option value="cloudy">Cloudy ☁️</option>
+              <option value="rainy">Rainy 🌧️</option>
+              <option value="heavy_rain">Heavy Rain ⛈️</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Priority Weights (Sums to 100%)</label>
+            <div class="weight-slider-container">
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span>🕐 Time (Speed)</span>
+                  <span id="weight-time-val" class="val">33%</span>
+                </div>
+                <input type="range" id="weight-time" min="0" max="100" value="33">
+              </div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span>💰 Cost (Affordability)</span>
+                  <span id="weight-cost-val" class="val">33%</span>
+                </div>
+                <input type="range" id="weight-cost" min="0" max="100" value="33">
+              </div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span>🌱 Eco (Emissions)</span>
+                  <span id="weight-eco-val" class="val">34%</span>
+                </div>
+                <input type="range" id="weight-eco" min="0" max="100" value="34">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Filter Available Modes</label>
+            <div id="mode-checkbox-container" class="checkbox-grid">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+
+          <button id="btn-calculate" class="btn">🔍 Find Best Route</button>
+        </div>
+
+        <!-- Output results -->
+        <div id="results-card" class="hide" style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- Congestion badge -->
+          <div id="congestion-display" class="congestion-badge">
+            Traffic Congestion Factor: 1.0x (Low 🟢)
+          </div>
+
+          <!-- Hero recommendation card -->
+          <div class="card recommendation-hero">
+            <div class="rec-badge"><i class="fas fa-trophy"></i> Best Recommendation</div>
+            <div class="rec-flex">
+              <div class="rec-left">
+                <h3 id="rec-title">Metro Train</h3>
+                <div style="display: flex; gap: 20px; margin-top: 12px;">
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Time</div>
+                    <span id="rec-time" style="font-weight: 700; font-size: 16px;">25 min</span>
+                  </div>
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Cost</div>
+                    <span id="rec-cost" style="font-weight: 700; font-size: 16px;">₹45</span>
+                  </div>
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Emissions</div>
+                    <span id="rec-emissions" style="font-weight: 700; font-size: 16px;">300g CO₂</span>
+                  </div>
+                </div>
+              </div>
+              <div class="rec-right">
+                <div class="rec-score">
+                  <span id="rec-score-val">0.89</span>
+                  <span>Composite Score</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side-by-side choices -->
+          <div class="grid-3">
+            <div class="card metric-card" style="background: rgba(16, 185, 129, 0.08);">
+              <span class="metric-icon">🌱</span>
+              <div class="metric-label">Eco Choice</div>
+              <div id="insight-eco-mode" style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">Bicycle</div>
+              <div id="insight-eco-val" class="metric-unit">0 g CO₂</div>
+            </div>
+            
+            <div class="card metric-card" style="background: rgba(245, 158, 11, 0.08);">
+              <span class="metric-icon">💰</span>
+              <div class="metric-label">Budget Choice</div>
+              <div id="insight-budget-mode" style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">Walking</div>
+              <div id="insight-budget-val" class="metric-unit">₹0</div>
+            </div>
+
+            <div class="card metric-card" style="background: rgba(59, 130, 246, 0.08);">
+              <span class="metric-icon">⚡</span>
+              <div class="metric-label">Fastest Choice</div>
+              <div id="insight-fastest-mode" style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">Motorcycle</div>
+              <div id="insight-fastest-val" class="metric-unit">18 min</div>
+            </div>
+          </div>
+
+          <!-- Visual chart -->
+          <div class="card">
+            <div class="card-title"><i class="fas fa-chart-bar"></i> Tradeoff Comparison</div>
+            <div class="chart-wrapper">
+              <canvas id="chart-planner-comparison"></canvas>
+            </div>
+          </div>
+
+          <!-- Details Table -->
+          <div class="card">
+            <div class="card-title"><i class="fas fa-list-ol"></i> Ranked Alternatives</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Transport Mode</th>
+                    <th>Travel Time</th>
+                    <th>Estimated Cost</th>
+                    <th>Emissions</th>
+                    <th>Score</th>
+                    <th>Tags</th>
+                  </tr>
+                </thead>
+                <tbody id="table-ranked-body">
+                  <!-- JS generated -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px;">
+              <span id="savings-statement" style="font-size: 13px; color: var(--text-secondary);">Saving calculation here...</span>
+              <button id="btn-save-commute" class="btn" style="width: auto;"><i class="fas fa-bookmark"></i> Save This Commute</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: ECO-COACH AI -->
+    <section id="view-coach" class="page-view">
+      <h1>🤖 Eco-Coach AI</h1>
+      <p class="subtitle">Chat with our rule-based advisor to receive personalized sustainability advice and transport recommendations.</p>
+
+      <div class="grid-2" style="grid-template-columns: 1.5fr 1fr; gap: 32px;">
+        <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="card-title"><i class="fas fa-comments"></i> Sustainability Advisor</div>
+          
+          <div class="chat-container">
+            <div id="chat-history" class="chat-history">
+              <!-- Chat history elements inserted via JS -->
+            </div>
+            
+            <div class="chat-input-area">
+              <input type="text" id="chat-input" placeholder="Ask about carbon emissions, saving costs, bicycling, or health...">
+              <button id="btn-send-chat" class="btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+
+          <div>
+            <label>Suggested Prompts</label>
+            <div class="suggested-questions">
+              <button class="suggestion-btn">How can I reduce my carbon footprint?</button>
+              <button class="suggestion-btn">Compare bus vs metro emissions</button>
+              <button class="suggestion-btn">What are the benefits of cycling?</button>
+              <button class="suggestion-btn">Tips for sustainable commuting</button>
+              <button class="suggestion-btn">How does carpooling help the environment?</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; gap: 20px;">
+          <div class="card-title"><i class="fas fa-info-circle"></i> Chat Methodology</div>
+          <p style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+            Our **Eco-Coach** runs fully client-side on your browser, using structured natural language patterns to map user queries directly to sustainable urban development strategies.
+          </p>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-leaf"></i>
+            <div>
+              <strong>SDG Goal 13 Alignment</strong><br>
+              Educating citizens on the environmental footprint of their travel choices directly supports Target 13.3 (raising capacity on climate mitigation).
+            </div>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid var(--card-border);">
+            <h4 style="font-family: var(--font-heading); color: var(--accent-primary); margin-bottom: 8px;">Try asking about:</h4>
+            <ul style="padding-left: 20px; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+              <li><strong>"carbon emissions"</strong> for details on emission factors.</li>
+              <li><strong>"saving costs"</strong> to review cost metrics and budgets.</li>
+              <li><strong>"cycling" or "walking"</strong> to learn about active commuting.</li>
+              <li><strong>"carpool"</strong> to learn how ride sharing cuts footprint.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: ANALYTICS DASHBOARD -->
+    <section id="view-analytics" class="page-view">
+      <h1>📊 Commute Analytics</h1>
+      <p class="subtitle">Visualize travel behaviors, emissions over time, and forecast road traffic congestion levels.</p>
+
+      <div id="analytics-no-data-alert" class="alert alert-info">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          No logged commutes found. Go to the **Route Planner**, find a route, and click **"Save This Commute"** to populate this dashboard!
+        </div>
+      </div>
+
+      <div id="analytics-visual-container" class="hide" style="display: flex; flex-direction: column; gap: 32px;">
+        <!-- Metrics Row -->
+        <div class="grid-4">
+          <div class="card metric-card">
+            <div class="metric-label">Total Commutes</div>
+            <div id="stat-total-commutes" class="metric-value">0</div>
+          </div>
+          <div class="card metric-card">
+            <div class="metric-label">Total Distance</div>
+            <div id="stat-total-distance" class="metric-value">0 km</div>
+          </div>
+          <div class="card metric-card">
+            <div class="metric-label">Carbon Emitted</div>
+            <div id="stat-total-emissions" class="metric-value">0 g</div>
+          </div>
+          <div class="card metric-card" style="border-color: var(--accent-primary);">
+            <div class="metric-label" style="color: var(--accent-primary);">CO₂ Saved vs Driving</div>
+            <div id="stat-total-savings" class="metric-value" style="color: var(--accent-primary);">0 g</div>
+          </div>
+        </div>
+
+        <!-- Tabbed Analytics Charts -->
+        <div class="card">
+          <div class="tab-container">
+            <button class="tab-btn active" data-tab="modes">Emissions by Mode</button>
+            <button class="tab-btn" data-tab="trends">Emissions Trend Over Time</button>
+            <button class="tab-btn" data-tab="forecast">Congestion Forecast Model</button>
+          </div>
+
+          <!-- Tab 1: Modal Split -->
+          <div id="tab-modes" class="tab-panel active">
+            <div class="chart-wrapper" style="height: 380px;">
+              <canvas id="chart-analytics-modes"></canvas>
+            </div>
+          </div>
+
+          <!-- Tab 2: Emissions over time -->
+          <div id="tab-trends" class="tab-panel">
+            <div class="chart-wrapper" style="height: 380px;">
+              <canvas id="chart-analytics-trends"></canvas>
+            </div>
+          </div>
+
+          <!-- Tab 3: Predictor Forecast line chart -->
+          <div id="tab-forecast" class="tab-panel">
+            <div style="display: flex; gap: 20px; margin-bottom: 20px; align-items: center;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="forecast-day" style="font-size: 11px;">Select Day</label>
+                <select id="forecast-day" style="padding: 8px 12px; font-size: 13px;">
+                  <option value="0">Monday (Weekday)</option>
+                  <option value="5">Saturday (Weekend)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="forecast-weather" style="font-size: 11px;">Select Weather</label>
+                <select id="forecast-weather" style="padding: 8px 12px; font-size: 13px;">
+                  <option value="0">Clear ☀️</option>
+                  <option value="2">Rainy 🌧️</option>
+                  <option value="3">Heavy Rain ⛈️</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-wrapper" style="height: 320px;">
+              <canvas id="chart-analytics-forecast"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: IMPACT TRACKER -->
+    <section id="view-impact" class="page-view">
+      <h1>🏆 Sustainability Impact Tracker</h1>
+      <p class="subtitle">Track your contributions towards UN Sustainable Development Goals 11 & 13 through everyday transit choices.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 32px;">
+        <!-- Large Hero Metric Card -->
+        <div class="card" style="text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(26, 31, 60, 0.45) 100%); border-color: var(--success);">
+          <span style="font-size: 48px; margin-bottom: 12px; display: inline-block;">🌳</span>
+          <h3 style="font-family: var(--font-heading); font-size: 24px; margin-bottom: 8px;">Your Total Carbon Offset</h3>
+          <div id="impact-co2-hero" style="font-size: 64px; font-family: var(--font-heading); font-weight: 800; color: var(--success);">0.00 kg</div>
+          <p style="color: var(--text-secondary); max-width: 600px; margin: 12px auto 0 auto; font-size: 14px;">
+            This is the cumulative amount of carbon dioxide you saved by choosing eco-friendly transit modes (metro, bus, cycling, walking, carpooling) instead of driving solo in a petrol car.
+          </p>
+
+          <!-- Progress bar towards goal -->
+          <div style="max-width: 600px; margin: 24px auto 0 auto; text-align: left;">
+            <div id="impact-progress-text" style="font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+              Goal Progress: 0 / 100 kg (0% Completed)
+            </div>
+            <div class="progress-bar-container">
+              <div id="impact-progress-fill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Equivalence indicators -->
+        <div>
+          <h2 style="font-family: var(--font-heading); margin-bottom: 16px; font-size: 22px;">🌲 What does this offset represent?</h2>
+          <div class="grid-4">
+            <div class="card metric-card">
+              <span class="metric-icon">🌳</span>
+              <div id="impact-trees" class="metric-value">0.0000</div>
+              <div class="metric-label" style="margin-top: 4px;">Annual Trees Worth</div>
+            </div>
+            <div class="card metric-card">
+              <span class="metric-icon">🚗</span>
+              <div id="impact-car-km" class="metric-value">0.0 km</div>
+              <div class="metric-label" style="margin-top: 4px;">Car KMs Avoided</div>
+            </div>
+            <div class="card metric-card">
+              <span class="metric-icon">📱</span>
+              <div id="impact-phones" class="metric-value">0</div>
+              <div class="metric-label" style="margin-top: 4px;">Smartphones Charged</div>
+            </div>
+            <div class="card metric-card">
+              <span class="metric-icon">💡</span>
+              <div id="impact-led" class="metric-value">0 hrs</div>
+              <div class="metric-label" style="margin-top: 4px;">LED Bulb Hours</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UN SDG Alignment Explanation -->
+        <div class="grid-2" style="gap: 32px;">
+          <div class="card">
+            <div class="card-title" style="color: #f99d26;"><i class="fas fa-city"></i> SDG 11 — Sustainable Cities</div>
+            <p style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+              Goal 11 focuses on making urban settlements inclusive, safe, resilient, and sustainable. By opting for shared transit (bus, metro) or active options (cycling, walking), you actively reduce road congestion and localized smog, contributing directly to:
+            </p>
+            <ul style="padding-left: 20px; font-size: 13px; color: var(--text-secondary); margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+              <li><strong>Target 11.2</strong>: Providing access to safe, affordable, accessible and sustainable transport systems for all.</li>
+              <li><strong>Target 11.6</strong>: Reducing the adverse environmental impact of cities (air quality & waste).</li>
+            </ul>
+          </div>
+          
+          <div class="card">
+            <div class="card-title" style="color: #48773e;"><i class="fas fa-globe-americas"></i> SDG 13 — Climate Action</div>
+            <p style="font-size: 14px; line-height: 1.6; color: var(--text-secondary);">
+              Goal 13 outlines urgent actions needed to combat climate change. Your decisions directly reduce greenhouse gas emissions, mitigating global warming. EcoRoute AI drives change by:
+            </p>
+            <ul style="padding-left: 20px; font-size: 13px; color: var(--text-secondary); margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+              <li><strong>Target 13.3</strong>: Improving awareness, education, and human capacity on climate change mitigation and impact reduction.</li>
+              <li>Quantifying and visualising exact carbon offsets, turning environmental choices into tangible achievements.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: SETTINGS -->
+    <section id="view-settings" class="page-view">
+      <h1>⚙️ Settings & Methodology</h1>
+      <p class="subtitle">Manage profiles, examine logged history database tables, and review evaluation viva questions.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 32px;">
+        <div class="grid-2" style="gap: 32px;">
+          <!-- Profile Manager -->
+          <div class="card">
+            <div class="card-title"><i class="fas fa-user-circle"></i> Profile Switcher</div>
+            <div class="form-group">
+              <label for="user-profile-select">Active Profile</label>
+              <select id="user-profile-select">
+                <!-- JS Populated -->
+              </select>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 12px; font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
+              <strong>Active Profile Details:</strong>
+              <div style="display: grid; grid-template-columns: 120px 1fr; gap: 8px; margin-top: 8px;">
+                <span>Name:</span><strong id="profile-name" style="color: #fff;">-</strong>
+                <span>City:</span><strong id="profile-city" style="color: #fff;">-</strong>
+                <span>Fav Mode:</span><strong id="profile-mode" style="color: #fff;">-</strong>
+              </div>
+            </div>
+
+            <!-- Create profile -->
+            <div style="border-top: 1px solid var(--card-border); padding-top: 16px;">
+              <h4 style="font-family: var(--font-heading); font-size: 15px; margin-bottom: 12px;">Create New Profile</h4>
+              <div class="form-group">
+                <input type="text" id="new-user-name" placeholder="Full Name">
+              </div>
+              <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                  <input type="text" id="new-user-city" placeholder="City (e.g., Delhi)">
+                </div>
+                <div class="form-group">
+                  <select id="new-user-pref">
+                    <option value="metro">Fav: Metro 🚇</option>
+                    <option value="bicycle">Fav: Bicycle 🚲</option>
+                    <option value="bus">Fav: Bus 🚌</option>
+                    <option value="electric_vehicle">Fav: EV ⚡</option>
+                    <option value="car_petrol">Fav: Car 🚗</option>
+                  </select>
+                </div>
+              </div>
+              <button id="btn-save-user" class="btn btn-secondary"><i class="fas fa-user-plus"></i> Create Profile</button>
+            </div>
+          </div>
+
+          <!-- DB Controller details -->
+          <div class="card">
+            <div class="card-title"><i class="fas fa-database"></i> Local Database Admin</div>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+              This web app stores all user profiles and logged commutes in your browser's persistent **LocalStorage**. It remains stored locally on this machine.
+            </p>
+            <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+              <div class="card metric-card" style="padding: 12px;">
+                <div class="metric-label" style="font-size: 10px;">Total Commute Logs</div>
+                <div id="db-stat-size" style="font-size: 18px; font-weight: 700;">0</div>
+              </div>
+              <div class="card metric-card" style="padding: 12px;">
+                <div class="metric-label" style="font-size: 10px;">Registered Users</div>
+                <div id="db-stat-users" style="font-size: 18px; font-weight: 700;">1</div>
+              </div>
+            </div>
+            <button id="btn-clear-db" class="btn btn-secondary" style="border-color: var(--danger); color: var(--danger);"><i class="fas fa-trash-alt"></i> Clear Commute History</button>
+          </div>
+        </div>
+
+        <!-- Raw database table -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-history"></i> Raw Commute Log History</div>
+          <div id="settings-no-data-alert" class="alert alert-info" style="margin-bottom:0;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>No logged commutes found. Plan and save commutes to populate logs!</div>
+          </div>
+          <div id="settings-history-container" class="table-container hide">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Route</th>
+                  <th>Distance</th>
+                  <th>Mode Used</th>
+                  <th>Cost (₹)</th>
+                  <th>Carbon Emitted</th>
+                </tr>
+              </thead>
+              <tbody id="settings-history-body">
+                <!-- JS generated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Internship Viva Q&A Accordion -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-graduation-cap"></i> Internship Evaluation Panel — Viva Q&A</div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            Below is a curated set of questions and detailed answers designed to prepare you for internship project reviews, viva voce exams, and presentations.
+          </p>
+
+          <div class="accordion">
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q1: How does EcoRoute AI align with UN Sustainable Development Goal 11?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                EcoRoute AI aligns with UN SDG 11 (Sustainable Cities and Communities) primarily through Target 11.2, which aims to provide access to safe, affordable, accessible, and sustainable transport systems. The system exposes the true carbon and cost footprint of 15 different travel modes side-by-side, motivating commuters to transition away from single-passenger private fossil fuel vehicles to public buses, electric rail (metro), carpools, or active transport (walking and bicycling). By driving this behavioral change, the system directly helps reduce traffic congestion and per-capita urban air pollution (Target 11.6).
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q2: What is the core Multi-Criteria Decision Making (MCDM) algorithm used in this project?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                The recommendation engine uses a Weighted Sum Model (WSM) with Min-Max Normalization. For every travel mode, it computes estimated travel time, financial cost, and carbon emissions. Since these criteria use different units (minutes, Rupees, grams of CO₂), they are normalized to a standard 0 to 1 scale, where 1 represents the best (lowest value) and 0 represents the worst (highest value). The user's sliders define weights for each criterion. The system computes a composite weighted score for each mode and ranks them in descending order.
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q3: How is traffic congestion predicted and how does it affect route calculations?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                Traffic congestion is simulated using a predictive regression heuristic that models peak rush hours (8-10 AM, 5-8 PM on weekdays), weekend traffic relief, and weather factors (rain increases congestion). Road-based modes (cars, buses, auto-rickshaws, and e-scooters) have their average speeds reduced by this congestion factor (ranging from 1.0x to 2.0x), which directly increases their estimated travel times. High-speed rail transit like the Metro and Local Trains, as well as active pedestrian modes, are calculated as congestion-free (constant speed).
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q4: What data sources were used to determine the carbon emission factors?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                Carbon emission parameters are derived from internationally recognized reporting standards. Baseline vehicle emission factors are based on the **DEFRA 2023** (UK Department for Environment, Food & Rural Affairs) greenhouse gas reporting database. These factors are adjusted for the Indian context: for example, private petrol hatchbacks are set to 170g CO₂/km, while the Electric Vehicle (EV) factor of 50g CO₂/km accounts for indirect emissions associated with India's electrical power grid (NITI Aayog / MoEFCC guidelines, which reflect a fossil-heavy grid mix).
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q5: How does the local storage database operate in this version of the app?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                Instead of a traditional server-side database (like PostgreSQL) or a local SQLite file requiring a Python runtime, this application uses the browser's native **LocalStorage** API. LocalStorage stores key-value pairs persistently in the user's browser, representing database tables (like users and commute history) as serialized JSON arrays. The `DatabaseManager` class reads, parses, and writes to these arrays, ensuring that commute history and profile weights persist across sessions without requiring any background database engine.
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q6: How does the rule-based Eco-Coach AI generate personalized advice?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                The Eco-Coach uses NLP pattern matching to classify user queries into 9 distinct sustainability domains (such as carbon impact, financial savings, benefits of cycling, public transit, carpooling, health, and electric vehicles). For each domain, it generates a comprehensive, contextual response detailing specific data points. If a user has recently calculated a route, the coach extracts details of that commute (distance, recommended mode) to compute custom carbon offset metrics (e.g., equivalent smartphone charges) to make the advice actionable.
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q7: What is the significance of the tree equivalence calculation?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                The tree equivalence makes the abstract metric of "grams of CO₂" tangible for everyday users. According to forestry and environmental research (e.g., European Environment Agency guidelines), a mature tree absorbs approximately 21 kg (21,000 grams) of carbon dioxide per year. By dividing the user's cumulative saved CO₂ (grams) by 21,000, the system computes the exact "annual work worth of a tree" the commuter has offset, promoting positive environmental reinforcement.
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q8: Why is a petrol car used as the baseline for savings calculations?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                Private single-occupancy petrol vehicles represent the highest-emitting mode of common urban transportation (170g CO₂/km). Using this as the baseline represents the maximum potential carbon cost of the trip. The savings shown indicate the emissions avoided by choosing a more sustainable alternative (e.g., metro rail emitting only 20g/km) instead of making the same journey in a standard private vehicle, highlighting the environmental value of the shift.
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q9: What are the economic savings associated with sustainable commuting?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                Sustainable transport options have a much lower per-kilometer cost. In typical Indian cities, operating a petrol car costs roughly ₹8.5/km (fuel + basic maintenance). Carpooling with 4 passengers cuts this to ₹2.13/km. Public bus fares average ₹1.5/km, and metro fares are roughly ₹3.0/km. Active modes like walking and cycling cost ₹0/km. Therefore, shifting a 20 km daily commute to the metro can save a commuter over ₹2,200 per week in transportation costs.
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">
+                Q10: What are the future enhancements planned for this project?
+                <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+              </div>
+              <div class="accordion-content">
+                Future planned features include: 1) Integration with real-time navigation APIs (like Google Maps or MapmyIndia) for live routing; 2) Integration with live public transit APIs for real-time bus and train arrivals; 3) A mobile application shell built using Cordova or Capacitor; 4) Gamification elements including community leaderboards and badges; and 5) Partnerships with corporate employers to allow verified green commutes to be redeemed for local rewards or carbon credits.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
