@@ -612,6 +612,20 @@ class AppController {
         }
       });
     });
+
+    // Update distance automatically based on origin and destination inputs
+    const updateDistance = () => {
+      const origin = this.originInput.value.trim();
+      const dest = this.destInput.value.trim();
+      if (origin && dest) {
+        const calculatedDistance = this.getDistanceForLocations(origin, dest);
+        this.distanceSlider.value = calculatedDistance;
+        this.distanceVal.textContent = calculatedDistance + ' km';
+      }
+    };
+
+    this.originInput.addEventListener('input', updateDistance);
+    this.destInput.addEventListener('input', updateDistance);
   }
 
   loadState() {
@@ -741,6 +755,51 @@ class AppController {
       this.ecoWeightSlider.value = eWt;
       this.ecoWeightVal.textContent = eWt + '%';
     }
+  }
+
+  getDistanceForLocations(origin, dest) {
+    const origNorm = origin.toLowerCase().trim().replace(/\s+/g, '');
+    const destNorm = dest.toLowerCase().trim().replace(/\s+/g, '');
+
+    // Database of popular pairs with realistic distances
+    const pairs = {
+      'indiranagar-electroniccity': 22,
+      'electroniccity-indiranagar': 22,
+      'indiranagar-marathahalli': 7,
+      'marathahalli-indiranagar': 7,
+      'electroniccity-majestic': 20,
+      'majestic-electroniccity': 20,
+      'majestic-koramangala': 10,
+      'koramangala-majestic': 10,
+      'airport-majestic': 35,
+      'majestic-airport': 35,
+      'koramangala-indiranagar': 6,
+      'indiranagar-koramangala': 6,
+      'mgroad-whitefield': 18,
+      'whitefield-mgroad': 18,
+      'connaughtplace-noida': 25,
+      'noida-connaughtplace': 25,
+      'gurgaon-delhiairport': 15,
+      'delhiairport-gurgaon': 15
+    };
+
+    const key = `${origNorm}-${destNorm}`;
+    if (pairs[key]) {
+      return pairs[key];
+    }
+
+    // Deterministic hash fallback (hash string to 3-45 km)
+    const str = origNorm + destNorm;
+    if (str.length === 0) return 15;
+    
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const min = 3;
+    const max = 45;
+    return min + (Math.abs(hash) % (max - min + 1));
   }
 
   getSelectedModes() {
